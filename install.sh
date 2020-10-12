@@ -1203,7 +1203,15 @@ done
 
 # Copy ta.key inside the client-conf directory
 for directory in "./client-conf/gnu-linux/" "./client-conf/osx-viscosity/" "./client-conf/windows/"; do
-  cp "/etc/openvpn/"{ca.crt,$CLIENT.key} $directory
+  cp "/etc/openvpn/"{ca.crt} $directory
+  case $TLS_SIG in
+		1)
+			cp "/etc/openvpn/"{tls-crypt.key} $directory
+			;;
+		2)
+			cp "/etc/openvpn/"{tls-auth.key} $directory
+			;;
+		esac
 done
 
 # Install third parties
