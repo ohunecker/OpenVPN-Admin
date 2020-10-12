@@ -4,6 +4,7 @@
 OS=$(cat /etc/os-release | grep PRETTY_NAME | sed 's/"//g' | cut -f2 -d= | cut -f1 -d " ") # Don't change this unless you know what you're doing
 timezone="$(cat /etc/timezone)" # this is PHP timezone
 gmt_offset="$(date +%z)" # this is system timezone
+gmt_offset=${gmt_offset:0:3}:${gmt_offset:3:2}
 www=$1
 user=$2
 group=$3
@@ -955,10 +956,10 @@ apt update && sudo apt upgrade -y
 
 case $OS in
 	Ubuntu)
-    apt install -y openvpn apache2 mariadb-server php php-mysql php-zip unzip git wget sed curl nodejs npm mc net-tools
+    apt install -y openvpn apache2 mariadb-server php php-mysql php-zip unzip git wget sed curl nodejs npm mc iptables openssl ca-certificates net-tools 
 		;;
 	Raspbian)
-		apt install -y openvpn apache2 mariadb-server php php-mysql php-zip unzip git wget sed curl nodejs npm mc
+		apt install -y openvpn apache2 mariadb-server php php-mysql php-zip unzip git wget sed curl nodejs npm mc iptables openssl ca-certificates
 		;;
 	*)
 		echo -e "${Red}Can't detect OS distribution! you need to install prerequisites manully${NC}"
@@ -1020,71 +1021,71 @@ fi
 
 echo -e "${Green}Downloading Easy-RSA and creating the Certificates${Yellow}"
 
-# Get the rsa keys
-EASYRSA_VERSION=$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest | grep "tag_name" | cut -f2 -d "v" | sed 's/[",]//g')
-EASYRSA_LOCATION=$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest \
-| grep "tag_name" \
-| awk '{print "https://github.com/OpenVPN/easy-rsa/releases/download/" substr($2, 2, length($2)-3) "/EasyRSA-" substr($2, 3, length($2)-4) ".tgz"}') \
-; curl -L -o easyrsa.tgz $EASYRSA_LOCATION
-
-tar -xaf "easyrsa.tgz"
-mv "EasyRSA-$EASYRSA_VERSION" /etc/openvpn/easy-rsa
-rm "easyrsa.tgz"
-
-cd /etc/openvpn/easy-rsa
-
-read -t 60 -p "Type it here or hit enter to use default naming (without .ovpn): " company_name </dev/tty
-
-if [[ ! -z $key_size ]]; then
-  export EASYRSA_KEY_SIZE=$key_size
-fi
-if [[ ! -z $ca_expire ]]; then
-  export EASYRSA_CA_EXPIRE=$ca_expire
-fi
-if [[ ! -z $cert_expire ]]; then
-  export EASYRSA_CERT_EXPIRE=$cert_expire
-fi
-if [[ ! -z $cert_country ]]; then
-  export EASYRSA_REQ_COUNTRY=$cert_country
-fi
-if [[ ! -z $cert_province ]]; then
-  export EASYRSA_REQ_PROVINCE=$cert_province
-fi
-if [[ ! -z $cert_city ]]; then
-  export EASYRSA_REQ_CITY=$cert_city
-fi
-if [[ ! -z $cert_org ]]; then
-  export EASYRSA_REQ_ORG=$cert_org
-fi
-if [[ ! -z $cert_ou ]]; then
-  export EASYRSA_REQ_OU=$cert_ou
-fi
-if [[ ! -z $cert_email ]]; then
-  export EASYRSA_REQ_EMAIL=$cert_email
-fi
-if [[ ! -z $key_cn ]]; then
-  export EASYRSA_REQ_CN=$key_cn
-fi 
-
-export EASYRSA_BATCH=1
+## Get the rsa keys
+#EASYRSA_VERSION=$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest | grep "tag_name" | cut -f2 -d "v" | sed 's/[",]//g')
+#EASYRSA_LOCATION=$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest \
+#| grep "tag_name" \
+#| awk '{print "https://github.com/OpenVPN/easy-rsa/releases/download/" substr($2, 2, length($2)-3) "/EasyRSA-" substr($2, 3, length($2)-4) ".tgz"}') \
+#; curl -L -o easyrsa.tgz $EASYRSA_LOCATION
+#
+#tar -xaf "easyrsa.tgz"
+#mv "EasyRSA-$EASYRSA_VERSION" /etc/openvpn/easy-rsa
+#rm "easyrsa.tgz"
+#
+#cd /etc/openvpn/easy-rsa
+#
+#read -t 60 -p "Type it here or hit enter to use default naming (without .ovpn): " company_name </dev/tty
+#
+#if [[ ! -z $key_size ]]; then
+#  export EASYRSA_KEY_SIZE=$key_size
+#fi
+#if [[ ! -z $ca_expire ]]; then
+#  export EASYRSA_CA_EXPIRE=$ca_expire
+#fi
+#if [[ ! -z $cert_expire ]]; then
+#  export EASYRSA_CERT_EXPIRE=$cert_expire
+#fi
+#if [[ ! -z $cert_country ]]; then
+#  export EASYRSA_REQ_COUNTRY=$cert_country
+#fi
+#if [[ ! -z $cert_province ]]; then
+#  export EASYRSA_REQ_PROVINCE=$cert_province
+#fi
+#if [[ ! -z $cert_city ]]; then
+#  export EASYRSA_REQ_CITY=$cert_city
+#fi
+#if [[ ! -z $cert_org ]]; then
+#  export EASYRSA_REQ_ORG=$cert_org
+#fi
+#if [[ ! -z $cert_ou ]]; then
+#  export EASYRSA_REQ_OU=$cert_ou
+#fi
+#if [[ ! -z $cert_email ]]; then
+#  export EASYRSA_REQ_EMAIL=$cert_email
+#fi
+#if [[ ! -z $key_cn ]]; then
+#  export EASYRSA_REQ_CN=$key_cn
+#fi 
+#
+#export EASYRSA_BATCH=1
 
 # Init PKI dirs and build CA certs
-./easyrsa init-pki
-./easyrsa build-ca nopass
-# Generate Diffie-Hellman parameters
-./easyrsa gen-dh
-# Genrate server keypair
-./easyrsa build-server-full server nopass
+#./easyrsa init-pki
+#./easyrsa build-ca nopass
+## Generate Diffie-Hellman parameters
+#./easyrsa gen-dh
+## Genrate server keypair
+#./easyrsa build-server-full server nopass
 
-# Generate shared-secret for TLS Authentication
-openvpn --genkey --secret pki/ta.key
+## Generate shared-secret for TLS Authentication
+#openvpn --genkey --secret pki/ta.key
 
 echo -e "${Green}Setup OpenVPN${NC}"
 
 # Copy certificates and the server configuration in the openvpn directory
-cp /etc/openvpn/easy-rsa/pki/{ca.crt,ta.key,issued/server.crt,private/server.key,dh.pem} "/etc/openvpn/"
+#cp /etc/openvpn/easy-rsa/pki/{ca.crt,ta.key,issued/server.crt,private/server.key,dh.pem} "/etc/openvpn/"
 cp "$base_path/installation/server.conf" "/etc/openvpn/"
-mkdir "/etc/openvpn/ccd"
+#mkdir "/etc/openvpn/ccd"
 #sed -i "s/port 1194/port $server_port/" "/etc/openvpn/server.conf"
 
 #if [ $openvpn_proto = "udp" ]; then
@@ -1094,38 +1095,38 @@ mkdir "/etc/openvpn/ccd"
 #nobody_group=$(id -ng nobody)
 #sed -i "s/group nogroup/group $nobody_group/" "/etc/openvpn/server.conf"
 
-echo -e "${Green}Setup Firewall${NC}"
+#echo -e "${Green}Setup Firewall${NC}"
 
 # Get primary NIC device name
-primary_nic=`route | grep '^default' | grep -o '[^ ]*$'`
+#primary_nic=`route | grep '^default' | grep -o '[^ ]*$'`
 
 # Iptable rules
-iptables -I FORWARD -i tun0 -j ACCEPT
-iptables -I FORWARD -o tun0 -j ACCEPT
-iptables -I OUTPUT -o tun0 -j ACCEPT
+#iptables -I FORWARD -i tun0 -j ACCEPT
+#iptables -I FORWARD -o tun0 -j ACCEPT
+#iptables -I OUTPUT -o tun0 -j ACCEPT
 
-iptables -A FORWARD -i tun0 -o $primary_nic -j ACCEPT
-iptables -t nat -A POSTROUTING -o $primary_nic -j MASQUERADE
-iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o $primary_nic -j MASQUERADE
-iptables -t nat -A POSTROUTING -s 10.8.0.2/24 -o $primary_nic -j MASQUERADE
+#iptables -A FORWARD -i tun0 -o $primary_nic -j ACCEPT
+#iptables -t nat -A POSTROUTING -o $primary_nic -j MASQUERADE
+#iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o $primary_nic -j MASQUERADE
+#iptables -t nat -A POSTROUTING -s 10.8.0.2/24 -o $primary_nic -j MASQUERADE
 
 # Make ip forwading and make it persistent
-case $OS in
-  Ubuntu)
-    sysctl -w net.ipv4.ip_forward=1
-    iptables-save ./rules.v4
-    if [[ ! -d "/etc/iptables" ]]
-    then
-      mkdir /etc/iptables
-    fi
-    mv ./rules.v4 /etc/iptables
-    apt-get install -y iptables-persistent
-    ;;
-  Raspbian)
-    echo 1 > "/proc/sys/net/ipv4/ip_forward"
-    echo "net.ipv4.ip_forward = 1" >> "/etc/sysctl.conf"
-    ;;
-esac
+#case $OS in
+#  Ubuntu)
+#    sysctl -w net.ipv4.ip_forward=1
+#    iptables-save ./rules.v4
+#    if [[ ! -d "/etc/iptables" ]]
+#    then
+#      mkdir /etc/iptables
+#    fi
+#    mv ./rules.v4 /etc/iptables
+#    apt-get install -y iptables-persistent
+#    ;;
+#  Raspbian)
+#    echo 1 > "/proc/sys/net/ipv4/ip_forward"
+#    echo "net.ipv4.ip_forward = 1" >> "/etc/sysctl.conf"
+#    ;;
+#esac
 
 echo -e "${Green}Setup MySQL Database${NC}"
 
@@ -1167,9 +1168,9 @@ for file in $(find -name client.ovpn); do
     cat "/etc/openvpn/ta.key" >> $file
     echo "</tls-auth>" >> $file
 
-  if [ $openvpn_proto = "udp" ]; then
-    sed -i "s/proto tcp-client/proto udp/" $file
-  fi
+  #if [ $openvpn_proto = "udp" ]; then
+  #  sed -i "s/proto tcp-client/proto udp/" $file
+  #fi
 done
 
 # Copy ta.key inside the client-conf directory
