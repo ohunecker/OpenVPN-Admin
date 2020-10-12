@@ -885,6 +885,33 @@ verb 3" >>/etc/openvpn/client-template.txt
 	if [[ $COMPRESSION_ENABLED == "y" ]]; then
 		echo "compress $COMPRESSION_ALG" >>/etc/openvpn/client-template.txt
 	fi
+  {
+		echo "<ca>"
+		cat "/etc/openvpn/easy-rsa/pki/ca.crt"
+		echo "</ca>"
+
+		echo "<cert>"
+		awk '/BEGIN/,/END/' "/etc/openvpn/easy-rsa/pki/issued/$CLIENT.crt"
+		echo "</cert>"
+
+		echo "<key>"
+		cat "/etc/openvpn/easy-rsa/pki/private/$CLIENT.key"
+		echo "</key>"
+
+		case $TLS_SIG in
+		1)
+			echo "<tls-crypt>"
+			cat /etc/openvpn/tls-crypt.key
+			echo "</tls-crypt>"
+			;;
+		2)
+			echo "key-direction 1"
+			echo "<tls-auth>"
+			cat /etc/openvpn/tls-auth.key
+			echo "</tls-auth>"
+			;;
+		esac
+	} >>"$homeDir/$CLIENT.ovpn"
   cat $base_path/installation/client-conf/client-default.conf >>/etc/openvpn/client-template.txt
 	# Generate the custom client.ovpn
 	#newClient
@@ -1159,14 +1186,15 @@ sed -i "s/\$pass = '';/\$pass = '$mysql_pass';/" "./include/config.php"
 
 # Replace in the client configurations with the ip of the server and openvpn protocol
 for file in $(find -name client.ovpn); do
-    sed -i "s/remote xxx\.xxx\.xxx\.xxx 1194/remote $public_ip $server_port/" $file
-    sed -i "s/remote xxx\.xxx\.xxx\.xxx 443/remote $public_ip $server_port/" $file
-    echo "<ca>" >> $file
-    cat "/etc/openvpn/ca.crt" >> $file
-    echo "</ca>" >> $file
-    echo "<tls-auth>" >> $file
-    cat "/etc/openvpn/ta.key" >> $file
-    echo "</tls-auth>" >> $file
+    cat /etc/openvpn/client-template.txt >> $file
+#    sed -i "s/remote xxx\.xxx\.xxx\.xxx 1194/remote $public_ip $server_port/" $file
+#    sed -i "s/remote xxx\.xxx\.xxx\.xxx 443/remote $public_ip $server_port/" $file
+#    echo "<ca>" >> $file
+#    cat "/etc/openvpn/ca.crt" >> $file
+#    echo "</ca>" >> $file
+#    echo "<tls-auth>" >> $file
+#    cat "/etc/openvpn/ta.key" >> $file
+#    echo "</tls-auth>" >> $file
 
   #if [ $openvpn_proto = "udp" ]; then
   #  sed -i "s/proto tcp-client/proto udp/" $file
