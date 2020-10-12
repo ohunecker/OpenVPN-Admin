@@ -911,7 +911,7 @@ verb 3" >>/etc/openvpn/client-template.txt
 			echo "</tls-auth>"
 			;;
 		esac
-	} >>"$homeDir/$CLIENT.ovpn"
+	} >>/etc/openvpn/client-template.txt
   cat $base_path/installation/client-conf/client-default.conf >>/etc/openvpn/client-template.txt
 	# Generate the custom client.ovpn
 	#newClient
