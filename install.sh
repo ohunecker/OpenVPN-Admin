@@ -890,13 +890,13 @@ verb 3" >>/etc/openvpn/client-template.txt
 		cat "/etc/openvpn/easy-rsa/pki/ca.crt"
 		echo "</ca>"
 
-		echo "<cert>"
-		awk '/BEGIN/,/END/' "/etc/openvpn/easy-rsa/pki/issued/$CLIENT.crt"
-		echo "</cert>"
+		#echo "<cert>"
+		#awk '/BEGIN/,/END/' "/etc/openvpn/easy-rsa/pki/issued/$CLIENT.crt"
+		#echo "</cert>"
 
-		echo "<key>"
-		cat "/etc/openvpn/easy-rsa/pki/private/$CLIENT.key"
-		echo "</key>"
+		#echo "<key>"
+		#cat "/etc/openvpn/easy-rsa/pki/private/$CLIENT.key"
+		#echo "</key>"
 
 		case $TLS_SIG in
 		1)
@@ -1203,7 +1203,7 @@ done
 
 # Copy ta.key inside the client-conf directory
 for directory in "./client-conf/gnu-linux/" "./client-conf/osx-viscosity/" "./client-conf/windows/"; do
-  cp "/etc/openvpn/"{ca.crt,ta.key} $directory
+  cp "/etc/openvpn/"{ca.crt,$CLIENT.key} $directory
 done
 
 # Install third parties
