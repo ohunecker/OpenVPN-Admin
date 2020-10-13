@@ -23,16 +23,16 @@ mysql_user=$(openssl rand -base64 12 | sed 's/[^a-zA-Z0-9]//g') # Random ceated 
 mysql_pass=$(openssl rand -base64 12 | sed 's/[^a-zA-Z0-9]//g') # Random ceated secure string without special chatacters
 
 # Certificates Variables
-key_size="2048" # anything less than 2048 may get rejected by some OSes. bigger sizes will take forever to generate!
-ca_expire="3650" # 10 Years
-cert_expire="3650"
-cert_country="US"
-cert_province="California"
-cert_city="Mission Viejo"
-cert_org="Arvage"
-cert_ou="IT"
-cert_email="example@test.net"
-key_cn=$public_ip # will be changed when asking for public IP/Hostname user input
+#key_size="2048" # anything less than 2048 may get rejected by some OSes. bigger sizes will take forever to generate!
+#ca_expire="3650" # 10 Years
+#cert_expire="3650"
+#cert_country="US"
+#cert_province="California"
+#cert_city="Mission Viejo"
+#cert_org="Arvage"
+#cert_ou="IT"
+#cert_email="example@test.net"
+#key_cn=$public_ip # will be changed when asking for public IP/Hostname user input
 
 # On-Screen Colors
 NC='\033[0m'            # No Color
@@ -50,7 +50,7 @@ print_help () {
 # Get parameters from User. Borrowed from https://github.com/angristan/openvpn-install
 function installQuestions() {
 	echo "Welcome to the OpenVPN installer!"
-	echo "The git repository is available at: https://github.com/angristan/openvpn-install"
+	echo "This installer based is borrowed from https://github.com/angristan/openvpn-install"
 	echo ""
 
 	echo "I need to ask you a few questions before starting the setup."
@@ -444,28 +444,28 @@ function installQuestions() {
 }
 
 function installOpenVPN() {
-	if [[ $AUTO_INSTALL == "y" ]]; then
-		# Set default choices so that no questions will be asked.
-		APPROVE_INSTALL=${APPROVE_INSTALL:-y}
-		APPROVE_IP=${APPROVE_IP:-y}
-		IPV6_SUPPORT=${IPV6_SUPPORT:-n}
-		PORT_CHOICE=${PORT_CHOICE:-1}
-		PROTOCOL_CHOICE=${PROTOCOL_CHOICE:-1}
-		DNS=${DNS:-1}
-		COMPRESSION_ENABLED=${COMPRESSION_ENABLED:-n}
-		CUSTOMIZE_ENC=${CUSTOMIZE_ENC:-n}
-		CLIENT=${CLIENT:-client}
-		PASS=${PASS:-1}
-		CONTINUE=${CONTINUE:-y}
-
-		# Behind NAT, we'll default to the publicly reachable IPv4/IPv6.
-		if [[ $IPV6_SUPPORT == "y" ]]; then
-			PUBLIC_IP=$(curl https://ifconfig.co)
-		else
-			PUBLIC_IP=$(curl -4 https://ifconfig.co)
-		fi
-		ENDPOINT=${ENDPOINT:-$PUBLIC_IP}
-	fi
+#	if [[ $AUTO_INSTALL == "y" ]]; then
+#		# Set default choices so that no questions will be asked.
+#		APPROVE_INSTALL=${APPROVE_INSTALL:-y}
+#		APPROVE_IP=${APPROVE_IP:-y}
+#		IPV6_SUPPORT=${IPV6_SUPPORT:-n}
+#		PORT_CHOICE=${PORT_CHOICE:-1}
+#		PROTOCOL_CHOICE=${PROTOCOL_CHOICE:-1}
+#		DNS=${DNS:-1}
+#		COMPRESSION_ENABLED=${COMPRESSION_ENABLED:-n}
+#		CUSTOMIZE_ENC=${CUSTOMIZE_ENC:-n}
+#		CLIENT=${CLIENT:-client}
+#		PASS=${PASS:-1}
+#		CONTINUE=${CONTINUE:-y}
+#
+#		# Behind NAT, we'll default to the publicly reachable IPv4/IPv6.
+#		if [[ $IPV6_SUPPORT == "y" ]]; then
+#			PUBLIC_IP=$(curl https://ifconfig.co)
+#		else
+#			PUBLIC_IP=$(curl -4 https://ifconfig.co)
+#		fi
+#		ENDPOINT=${ENDPOINT:-$PUBLIC_IP}
+#	fi
 
 	# Run setup questions first, and set other variales if auto-install
 	installQuestions
@@ -532,7 +532,7 @@ function installOpenVPN() {
 	# Install the latest version of easy-rsa from source, if not already installed.
 	if [[ ! -d /etc/openvpn/easy-rsa/ ]]; then
 		local version="$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest | grep "tag_name" | cut -f2 -d "v" | sed 's/[",]//g')"
-		wget -O ~/easy-rsa.tgz https://github.com/OpenVPN/easy-rsa/releases/download/v${version}/EasyRSA-${version}.tgz
+    wget -O ~/easy-rsa.tgz https://github.com/OpenVPN/easy-rsa/releases/download/v${version}/EasyRSA-${version}.tgz
 		mkdir -p /etc/openvpn/easy-rsa
 		tar xzf ~/easy-rsa.tgz --strip-components=1 --directory /etc/openvpn/easy-rsa
 		rm -f ~/easy-rsa.tgz
@@ -729,7 +729,7 @@ status /var/log/openvpn/status.log
 verb 3" >>$base_path/installation/server.conf
   
   # import default-server.conf for user-auth over sql-database
-  cat $base_path/installation/server-dafault.conf >>$base_path/installation/server.conf
+  cat $base_path/installation/server-default.conf >>$base_path/installation/server.conf
 
 	# Create client-config-dir dir
 	mkdir -p /etc/openvpn/ccd
