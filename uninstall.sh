@@ -121,6 +121,7 @@ fi
 www="$1/openvpn-admin"
 
 if [ ! -d "$www" ]; then
+  echo "Web appliction '$www' doesn't exist!"
   print_help
   exit
 fi
