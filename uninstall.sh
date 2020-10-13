@@ -149,5 +149,5 @@ if [ "$agree" != "yes" ]; then
   exit
 fi
 removeOpenVPN
-
+removeWebApplication
 
