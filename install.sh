@@ -1049,7 +1049,7 @@ if [ $? -eq 0 ]; then
   exit
 fi
 
-echo -e "${Green}Downloading Easy-RSA and creating the Certificates${Yellow}"
+#echo -e "${Green}Downloading Easy-RSA and creating the Certificates${Yellow}"
 
 ## Get the rsa keys
 #EASYRSA_VERSION=$(curl -s https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest | grep "tag_name" | cut -f2 -d "v" | sed 's/[",]//g')
@@ -1206,13 +1206,13 @@ done
 
 # Copy ta.key inside the client-conf directory
 for directory in "./client-conf/gnu-linux/" "./client-conf/osx-viscosity/" "./client-conf/windows/"; do
-  cp "/etc/openvpn/"{ca.crt} $directory
+  cp /etc/openvpn/ca.crt $directory
   case $TLS_SIG in
 		1)
-			cp "/etc/openvpn/"{tls-crypt.key} $directory
+			cp /etc/openvpn/tls-crypt.key $directory
 			;;
 		2)
-			cp "/etc/openvpn/"{tls-auth.key} $directory
+			cp /etc/openvpn/tls-auth.key $directory
 			;;
 		esac
 done
@@ -1276,9 +1276,9 @@ echo -e "             Your Public URL: ${Red}http://$public_ip ${NC}"
 echo -e "             Auto Generated MySQL Root Password: ${Red}$mysql_root_pass ${NC}" 
 echo -e "             Auto Generated OpenVPN-Admin MySQL Username: ${Red}$mysql_user ${NC}"
 echo -e "             Auto Generated OpenVPN-Admin MySQL Password: ${Red}$mysql_pass ${NC}"
-echo -e "             Selected download file name: ${Red}$company_name.ovpn ${NC}"
+#echo -e "             Selected download file name: ${Red}$company_name.ovpn ${NC}"
 echo
-echo -e " Please, report any issues here https://github.com/arvage/OpenVPN-Admin"
+echo -e " Please, report any issues here https://github.com/ohunecker/OpenVPN-Admin"
 echo
 echo -e "${Yellow}################################################################################${NC}"
 echo -e "${Yellow}################################################################################${NC}"

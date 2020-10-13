@@ -11,8 +11,8 @@ function removeWebApplication(){
   echo "DROP DATABASE \`openvpn-admin\`" | mysql -u root --password="$mysql_root_pass"
 
   # Files delete (openvpn confs/keys + web application)
-  rm -r /etc/openvpn/easy-rsa/
-  rm -r /etc/openvpn/{ccd,scripts,server.conf,ca.crt,ta.key,server.crt,server.key,dh*.pem}
+  #rm -r /etc/openvpn/easy-rsa/
+  #rm -r /etc/openvpn/{ccd,scripts,server.conf,ca.crt,ta.key,server.crt,server.key,dh*.pem}
   rm -r "$www"
 
   # Remove rooting rules
@@ -31,8 +31,9 @@ function removeWebApplication(){
   a2dissite openvpn 
   a2ensite 000-default
   systemctl restart apache2
-
-  sed -i "/added by openvpn-admin/d" /etc/php/7.3/apache2/php.ini
+  
+  php_ver=$(php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "\n";')
+  sed -i "/added by openvpn-admin/d" /etc/php/$php_ver/apache2/php.ini
   echo "The web-application has been completely removed!"
 }
 
