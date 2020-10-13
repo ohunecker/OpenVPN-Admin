@@ -916,6 +916,7 @@ verb 3" >>/etc/openvpn/client-template.txt
 	if [[ $COMPRESSION_ENABLED == "y" ]]; then
 		echo "compress $COMPRESSION_ALG" >>/etc/openvpn/client-template.txt
 	fi
+  cat $base_path/installation/client-conf/client-default.conf >>/etc/openvpn/client-template.txt
   {
 		echo "<ca>"
 		cat "/etc/openvpn/easy-rsa/pki/ca.crt"
@@ -943,7 +944,7 @@ verb 3" >>/etc/openvpn/client-template.txt
 			;;
 		esac
 	} >>/etc/openvpn/client-template.txt
-  cat $base_path/installation/client-conf/client-default.conf >>/etc/openvpn/client-template.txt
+  
 	# Generate the custom client.ovpn
 	#newClient
 	#echo "If you want to add more clients, you simply need to run this script another time!"
@@ -1219,7 +1220,7 @@ sed -i "s/\$pass = '';/\$pass = '$mysql_pass';/" "./include/config.php"
 
 # Replace in the client configurations with the ip of the server and openvpn protocol
 for file in $(find -name client.ovpn); do
-    cat /etc/openvpn/client-template.txt >> $file
+    cat /etc/openvpn/client-template.txt > $file
 #    sed -i "s/remote xxx\.xxx\.xxx\.xxx 1194/remote $public_ip $server_port/" $file
 #    sed -i "s/remote xxx\.xxx\.xxx\.xxx 443/remote $public_ip $server_port/" $file
 #    echo "<ca>" >> $file
