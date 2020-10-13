@@ -30,10 +30,12 @@ function removeWebApplication(){
 
   a2dissite openvpn 
   a2ensite 000-default
-  systemctl restart apache2
-  
+
   php_ver=$(php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "\n";')
   sed -i "/added by openvpn-admin/d" /etc/php/$php_ver/apache2/php.ini
+  
+  systemctl reload apache2
+  systemctl restart apache2
   echo "The web-application has been completely removed!"
 }
 
