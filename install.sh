@@ -137,10 +137,18 @@ function installQuestions() {
 	done
 	case $PROTOCOL_CHOICE in
 	1)
-		PROTOCOL="udp"
+    if [[ $IPV6_SUPPORT == 'n' ]]; then
+		  PROTOCOL="udp4"
+	  elif [[ $IPV6_SUPPORT == 'y' ]]; then
+		  PROTOCOL="udp6"
+	  fi
 		;;
 	2)
-		PROTOCOL="tcp"
+  if [[ $IPV6_SUPPORT == 'n' ]]; then
+		  PROTOCOL="tcp4"
+	  elif [[ $IPV6_SUPPORT == 'y' ]]; then
+		  PROTOCOL="tcp6"
+	  fi
 		;;
 	esac
 	echo ""
