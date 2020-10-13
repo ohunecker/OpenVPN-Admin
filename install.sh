@@ -548,10 +548,11 @@ function installOpenVPN() {
 			;;
 		esac
 
-		# Generate a random, alphanumeric identifier of 16 characters for CN and one for server name
-		SERVER_CN="cn_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+
+		# Generate identifier for CN and one for server name
+		SERVER_CN="cn_$company_name"
 		echo "$SERVER_CN" >SERVER_CN_GENERATED
-		SERVER_NAME="server_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+		SERVER_NAME="server_$company_name"
 		echo "$SERVER_NAME" >SERVER_NAME_GENERATED
 
 		echo "set_var EASYRSA_REQ_CN $SERVER_CN" >>vars
@@ -957,17 +958,19 @@ fi
 #  key_cn=$public_ip
 #  echo -e "\n${NC}Selected IP/Hostname: ${Red}$public_ip ${NC}"
 #fi
-echo -e "\n\n\nSelect the VPN connection name for showing up on your client OpenVPN application."
+echo -e "\n\n\nSelect the VPN connection/server name for showing up on your client OpenVPN application."
 echo -e "This will help the user identify which VPN he is connecting to if he has multiple connection configuration."
-echo -e "Default file names will be used if you don't choose any. You may use your company Name."
+echo -e "Random file names will be used if you don't choose any. You may use your company Name."
 echo -e "Timeout: 60 Seconds"
-read -t 60 -p "Type it here or hit enter to use default naming (without .ovpn): " company_name </dev/tty
+read -t 60 -p "Type it here or hit enter to use random naming (without .ovpn): " company_name </dev/tty
 
 if [ -z "$company_name" ]
 then
-  echo -e "\nDefault file naming selected."
+  # Generate a random, alphanumeric identifier of 16 characters for CN and one for server name
+  company_name="cn_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+  echo -e "\Random connection/server name ${Red}'$company_name'${NC} generated."
 else
-  echo -e "\nSelected file name: ${Red}$company_name.ovpn${NC}"
+  echo -e "\nConnection/serve name: ${Red}$company_name${NC}"
 fi
 
 #echo -e "${Yellow}\nNow sit back and wait for the script to finish the install\n${NC}"
