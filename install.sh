@@ -47,6 +47,31 @@ print_help () {
   echo -e "\tuser:     User of the web application (e.g. www-data)"
   echo -e "\tgroup:    Group of the web application (e.g. www-data)"
 }
+# start OpenVPN Service
+function startOpenVpnService () {
+  # Finally, restart and enable OpenVPN
+	if [[ $OS == 'arch' || $OS == 'fedora' || $OS == 'centos' ]]; then
+		systemctl start openvpn-server@server
+	elif [[ $OS == "ubuntu" ]] && [[ $VERSION_ID == "16.04" ]]; then
+		systemctl start openvpn
+	else
+		systemctl start openvpn@server
+	fi
+}
+
+# restart OpenVPN Service
+function restartOpenVpnService () {
+  # Finally, restart and enable OpenVPN
+	if [[ $OS == 'arch' || $OS == 'fedora' || $OS == 'centos' ]]; then
+		systemctl restart openvpn-server@server
+	elif [[ $OS == "ubuntu" ]] && [[ $VERSION_ID == "16.04" ]]; then
+		systemctl start openvpn
+	else
+		systemctl restart openvpn@server
+	fi
+}
+
+
 # Get parameters from User. Borrowed from https://github.com/angristan/openvpn-install
 function installQuestions() {
 	echo "Welcome to the OpenVPN installer!"
@@ -778,12 +803,10 @@ verb 3" >>$base_path/installation/server.conf
 
 		systemctl daemon-reload
 		systemctl enable openvpn-server@server
-		systemctl restart openvpn-server@server
 	elif [[ $OS == "ubuntu" ]] && [[ $VERSION_ID == "16.04" ]]; then
 		# On Ubuntu 16.04, we use the package from the OpenVPN repo
 		# This package uses a sysvinit service
 		systemctl enable openvpn
-		systemctl start openvpn
 	else
 		# Don't modify package-provided service
 		cp /lib/systemd/system/openvpn\@.service /etc/systemd/system/openvpn\@.service
@@ -795,7 +818,6 @@ verb 3" >>$base_path/installation/server.conf
 
 		systemctl daemon-reload
 		systemctl enable openvpn@server
-		systemctl restart openvpn@server
 	fi
 
 	if [[ $DNS == 2 ]]; then
@@ -1247,7 +1269,7 @@ a2dissite 000-default
 a2ensite openvpn
 systemctl restart apache2
 
-echo -e "${Green}Finalizing OpenVPN Configuration${NC}"
+echo -e "${Green}Starting OpenVPN and iptable services${NC}"
 #sed -i 's/explicit-exit-notify 1/# explicit-exit-notify 1/g' /etc/openvpn/server.conf
 #sed -i 's/80.67.169.12/8.8.8.8/g' /etc/openvpn/server.conf
 #sed -i 's/80.67.169.40/8.8.4.4/g' /etc/openvpn/server.conf
@@ -1257,7 +1279,9 @@ then
 else
   sed -i "s/filename=\$save_name/filename=$company_name\.ovpn/g" /var/www/openvpn-admin/index.php
 fi
-systemctl start openvpn@server
+startOpenVpnService
+# Enable service and apply rules
+systemctl start iptables-openvpn
 
 #printf "\033[1m\n\n################################# Let'sEncrypt SSL Certificate ####################################\n"
 #printf "\033[1m###### NOTE: You need port 80 on the public facing side to be open and forwarded to this instance #####\n"
@@ -1284,11 +1308,12 @@ echo -e "             Your Public URL: ${Red}http://$public_ip ${NC}"
 echo -e "             Auto Generated MySQL Root Password: ${Red}$mysql_root_pass ${NC}" 
 echo -e "             Auto Generated OpenVPN-Admin MySQL Username: ${Red}$mysql_user ${NC}"
 echo -e "             Auto Generated OpenVPN-Admin MySQL Password: ${Red}$mysql_pass ${NC}"
-#echo -e "             Selected download file name: ${Red}$company_name.ovpn ${NC}"
+echo -e "             Selected download file name: ${Red}$company_name.ovpn ${NC}"
 echo
 echo -e " Please, report any issues here https://github.com/ohunecker/OpenVPN-Admin"
 echo
 echo -e "${Yellow}################################################################################${NC}"
 echo -e "${Yellow}################################################################################${NC}"
 
-systemctl restart openvpn@server
+restartOpenVpnService
+systemctl restart iptables-openvpn
