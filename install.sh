@@ -760,6 +760,8 @@ tls-version-min 1.2
 tls-cipher $CC_CIPHER
 client-config-dir /etc/openvpn/ccd
 status /var/log/openvpn/status.log
+log /var/log/openvpn/openvpn.log
+log-append /var/log/openvpn/openvpn.log
 verb 3" >>$base_path/installation/server.conf
   
   # import default-server.conf for user-auth over sql-database
